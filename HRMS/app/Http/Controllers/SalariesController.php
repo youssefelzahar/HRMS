@@ -5,15 +5,33 @@ namespace App\Http\Controllers;
 use App\Models\Salaries;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
+use App\ResponseTrait;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Validator;
+use App\ControllerRepo\SalariesRepository;
 class SalariesController extends Controller
 {
+    use ResponseTrait;
+
     /**
      * Display a listing of the resource.
      */
+    
+     protected $repository;
+
+     public function __construct(SalariesRepository $repository)
+     {
+         $this->repository = $repository;
+     }
     public function index()
     {
         //
+        $index=$this->repository->getAll();
+        return$this->success(
+           $data=$index,
+           $message="success to get data",
+        );
     }
 
     /**
@@ -22,6 +40,11 @@ class SalariesController extends Controller
     public function create()
     {
         //
+        $create=Salaries::with('employee.user')->get();
+        return$this->success(
+            $data=$create,
+            $message="success to create data",
+        );
     }
 
     /**
@@ -30,6 +53,27 @@ class SalariesController extends Controller
     public function store(Request $request)
     {
         //
+        $validator=Validator::make($request->all(),[
+            'employee_id'=>'required',
+            'amount'=>'required',
+            'effective_date'=>'required',
+        ]);
+        if($validator->fails()){
+            return$this->failure(
+                message:"failed to store data",error:$validator->errors()->first());};
+
+             try{
+                $salarries=$this->repository->create($validator->validated());
+                return $this->success(
+                    data:$salarries,
+                    message:"success to store data",
+                ) ;   
+             }   catch(\Exception $e){
+                return$this->failure(
+                    $message="failed to store data",error:$e->getMessage());
+             }
+          
+
     }
 
     /**
@@ -46,6 +90,11 @@ class SalariesController extends Controller
     public function edit(Salaries $salaries)
     {
         //
+         $salaries->find($salaries->id);
+        return$this->success(
+            $data=$salaries,
+            $message="success to edit data",
+        );
     }
 
     /**
@@ -53,8 +102,47 @@ class SalariesController extends Controller
      */
     public function update(Request $request, Salaries $salaries)
     {
-        //
+    
+        try {
+            $updatedSalary = Salaries::findOrFail($salaries->id);
+        } catch (\Exception $e) {
+            // Log error and return failure response
+            \Log::error('Failed to find salary record:', ['error' => $e->getMessage()]);
+            return $this->failure(
+                $message = "Record not found",
+                error: $e->getMessage(),
+            );
+        }
+    
+        $validator = Validator::make($request->all(), [
+            'employee_id' => 'required',
+            'amount' => 'required',
+            'effective_date' => 'required',
+        ]);
+    
+        if ($validator->fails()) {
+            return $this->failure(
+                $message = "Failed to validate data",
+                error:$validator->errors(),
+            );
+        }
+    
+        try {
+            $updatedSalary= $this->repository->update($salaries->id,$validator->validated());
+    
+           return $this->success(
+               $message = "success to update data",
+               $data = $updatedSalary,
+           );
+       
+        } catch (\Exception $e) {
+            return $this->failure(
+                $message = "Failed to update data"
+                ,error:$e->getMessage()
+            );
+        }
     }
+    
 
     /**
      * Remove the specified resource from storage.
@@ -62,5 +150,21 @@ class SalariesController extends Controller
     public function destroy(Salaries $salaries)
     {
         //
+        try{
+        
+            $this->repository->delete($salaries->id);
+            return $this->success(
+                $message="success to delete data",
+    
+            );
+        }catch(\Exception $e){
+            return$this->failure(
+                $message="failed to delete data"
+                ,error:$e->getMessage()
+            );
+        }
+
+       
+
     }
 }
