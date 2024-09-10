@@ -90,7 +90,7 @@ class RolesController extends Controller
         }    
 
         try{
-            $update=$this->reprository->update($roles->id,$validator->validated());
+            $update=$this->reprository->update($roles->id,$validator->validated(),$version=1);
             return $this->success($update,'success to update data');
 
         }catch(\Exception $e){

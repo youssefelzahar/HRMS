@@ -68,6 +68,7 @@ class EmployeeController extends Controller
             'hire_date' => 'required|date',
             'salary' => 'required|numeric',
             'status' => 'required|in:active,terminated',
+            'version'=>'required|integer',
         ]);
 
         if ($validator->fails()) {
@@ -75,9 +76,10 @@ class EmployeeController extends Controller
         }
  
         try{
-            $update= $this->repository->update($employee->id, $validator->validated());
+
+            $updated= $this->repository->update($employee->id, $validator->validated());
             return $this->success(
-                $update,
+                $updated,
                 'success to update data',
             );
         }catch(\Exception $e)

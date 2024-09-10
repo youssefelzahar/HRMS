@@ -3,6 +3,8 @@ namespace App\BaseRepo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use App\interface\BaseInterface;
+use Illuminate\Support\Facades\DB; 
+
 class BaseRpo implements BaseInterface{
 
     public function __construct(Model $model){
@@ -24,17 +26,34 @@ class BaseRpo implements BaseInterface{
 
   public function create(array $data)
 {
+  return DB::transaction(function () use ($data) {
+        
     $created=$this->model->create($data);
     Cache::forget('all_' . class_basename($this->model));
     return $created;
+  },5);
 }
 
 public function update($id, array $data)
 {
-    $updated=$this->model->where('id', $id)->update($data);
-    Cache::forget('all_' . class_basename($this->model));
-    return $updated;
+    return DB::transaction(function () use ($id, $data) {
+        // Find the current version
+        $current = $this->model->find($id);
+
+        // Copy the current record into a new version
+        $newVersion = $current->replicate();
+        $newVersion->version += 1;
+        $newVersion->save();
+
+        // Update the new version
+        $newVersion->update($data);
+
+        Cache::forget('all_' . class_basename($this->model));
+        return $newVersion;
+    });
 }
+
+
 
 public function delete($id)
 {
