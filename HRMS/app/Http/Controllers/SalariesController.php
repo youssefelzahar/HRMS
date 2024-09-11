@@ -10,6 +10,7 @@ use App\ResponseTrait;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use App\ControllerRepo\SalariesRepository;
+use App\Http\Requests\SalariesRequest;
 class SalariesController extends Controller
 {
     use ResponseTrait;
@@ -50,20 +51,12 @@ class SalariesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(SalariesRequest $request)
     {
         //
-        $validator=Validator::make($request->all(),[
-            'employee_id'=>'required',
-            'amount'=>'required',
-            'effective_date'=>'required',
-        ]);
-        if($validator->fails()){
-            return$this->failure(
-                message:"failed to store data",error:$validator->errors()->first());};
-
+       
              try{
-                $salarries=$this->repository->create($validator->validated());
+                $salarries=$this->repository->create($request->validated());
                 return $this->success(
                     data:$salarries,
                     message:"success to store data",
@@ -100,7 +93,7 @@ class SalariesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Salaries $salaries)
+    public function update(SalariesRequest $request, Salaries $salaries)
     {
     
         try {
@@ -114,21 +107,10 @@ class SalariesController extends Controller
             );
         }
     
-        $validator = Validator::make($request->all(), [
-            'employee_id' => 'required',
-            'amount' => 'required',
-            'effective_date' => 'required',
-        ]);
-    
-        if ($validator->fails()) {
-            return $this->failure(
-                $message = "Failed to validate data",
-                error:$validator->errors(),
-            );
-        }
+   
     
         try {
-            $updatedSalary= $this->repository->update($salaries->id,$validator->validated());
+            $updatedSalary= $this->repository->update($salaries->id,$request->validated());
     
            return $this->success(
                $message = "success to update data",

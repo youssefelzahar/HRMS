@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Collection;
 use App\ResponseTrait;
 use App\ControllerRepo\AttendenceReprository;
+use App\Http\Requests\AttendanceRequest;
 class AttendanceController extends Controller
 {
     use ResponseTrait;
@@ -65,25 +66,13 @@ class AttendanceController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(AttendanceRequest $request)
     {
         //
-        $validator = Validator::make($request->all(), [
-            'employee_id' => 'required|numeric',
-            'date' => 'required|date_format:Y-m-d',
-            'check_in_time' => 'required|date_format:Y-m-d H:i:s',
-            'check_out_time' => 'required|date_format:Y-m-d H:i:s|after:check_in_time',
-            'status' => 'required|string',]);
-            if ($validator->fails()) {
-                return $this->failure(
-                    message:"error to validate",
-                    error:$validator->errors()->first()
-                );
-                }
            
             try{
               
-                $attendances=  $this->repository->create($validator->validated());
+                $attendances=  $this->repository->create($request->validated());
 
                 return $this->success(
                     data:$attendances,
@@ -122,27 +111,15 @@ class AttendanceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Attendance $attendance)
+    public function update(AttendanceRequest $request, Attendance $attendance)
     {
         //
         $update=Attendance::findorfail($attendance->id);
-        $validator = Validator::make($request->all(), [
-            'employee_id' => 'required|numeric',
-            'date' => 'required|date_format:Y-m-d',
-            'check_in_time' => 'required|date_format:Y-m-d H:i:s',
-            'check_out_time' => 'required|date_format:Y-m-d H:i:s|after:check_in_time',
-            'status' => 'required|string',]);
-            if ($validator->fails()) {
-                return $this->failure(
-                    message:"error to validate",
-                    error:$validator->errors()->first()
-                );
-                }
+     
                
-
                try{
               
-                $update=  $this->repository->update($attendance->id,$validator->validated());
+                $update=  $this->repository->update($attendance->id,$request->validated());
 
                 return $this->success(
                     data:$update,

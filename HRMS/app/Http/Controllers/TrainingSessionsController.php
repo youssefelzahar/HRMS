@@ -10,6 +10,7 @@ use     Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Collection;
 use App\ResponseTrait;
 use App\ControllerRepo\TrainingSesionsReprository;
+use App\Http\Requests\TranningSessionRequest;
 class TrainingSessionsController extends Controller
 {
     use ResponseTrait;
@@ -40,21 +41,12 @@ class TrainingSessionsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(TranningSessionRequest $request)
     {
         //
-        $validator=Validator::make($request->all(),[
-            'title' => 'required',
-            'description' => 'required',
-            'date' => 'required|date',
-            'location' => 'required',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->failure("not validate",$validator->errors());
-        }
+      
         try{
-            $trainingSessions=$this->reprository->create($validator->validated());
+            $trainingSessions=$this->reprository->create($request->validated());
             return $this->success($trainingSessions, 'success to store data');
         }catch(\Exception $e){
             return $this->failure("faild to store",$e->getMessage());
@@ -81,7 +73,7 @@ class TrainingSessionsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, TrainingSessions $trainingSessions)
+    public function update(TranningSessionRequest $request, TrainingSessions $trainingSessions)
     {
         //
         try {
@@ -94,20 +86,11 @@ class TrainingSessionsController extends Controller
                 error: $e->getMessage(),
             );
         }
-        $validator=Validator::make($request->all(),[
-            'title' => 'required',
-            'description' => 'required',
-            'date' => 'required|date',
-            'location' => 'required',
-        ]);
 
-        if ($validator->fails()) {
-            return $this->failure("not validate",$validator->errors());
-        }
         try{
            // $update=TrainingSessions::findorfail($trainingSessions->id);
 
-            $update=$this->reprository->update($trainingSessions->id,$validator->validated());
+            $update=$this->reprository->update($trainingSessions->id,$request->validated());
             return $this->success($update, 'success to update data');
         }catch(\Exception $e){
             return $this->failure("faild to uopdate",$e->getMessage());

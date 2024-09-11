@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Collection;
 use App\ControllerRepo\RoleReprositroy;
+use App\Http\Requests\RolesRequest;
 class RolesController extends Controller
 {
     /**
@@ -37,20 +38,12 @@ class RolesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(RolesRequest $request)
     {
         //
-        $validator=Validator::make($request->all(),[
-            
-            'name'=>'required',
-            'description'=>'required',
-        ]);
-
-        if($validator->fails()){
-            return $this->failure("not validate",$validator->errors());}
-
+        
         try{
-            $roles=$this->reprository->create($validator->validated());
+            $roles=$this->reprository->create($request->validated());
             return $this->success($roles,'success to store data');
         }catch(\Exception $e){
             return $this->failure("faild to store",$e->getMessage());
@@ -77,20 +70,14 @@ class RolesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Roles $roles)
+    public function update(RolesRequest $request, Roles $roles)
     {
         //
         $update=Roles::findorfail($roles->id);
-        $validator=Validator::make($request->all(),[
-            'name'=>'nullable|required',
-            'description'=>'nullable|required',
-        ]);
-        if($validator->fails()){
-            return $this->failure("not validate",$validator->errors());
-        }    
+   
 
         try{
-            $update=$this->reprository->update($roles->id,$validator->validated(),$version=1);
+            $update=$this->reprository->update($roles->id,$request->validated());
             return $this->success($update,'success to update data');
 
         }catch(\Exception $e){

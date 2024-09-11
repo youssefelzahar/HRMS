@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Collection;
 use App\ResponseTrait;
 use App\ControllerRepo\DocumentsRepository;
+use App\Http\Requests\DocumentsRequest;
 class DocumentsController extends Controller
 { 
     use ResponseTrait;
@@ -40,20 +41,10 @@ class DocumentsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(DocumentsRequest $request)
     {
         //
-        $validator=Validator::make($request->all(),[
-            "employee_id"=>"required",
-            "document_type"=>"required",
-            'file' => 'required|file|mimes:pdf,jpg,png|max:2048', // Limit file types and size
-            "uploaded_at"=>"required", 
-        ]);
 
-        if($validator->fails()){
-            return $this->failure(
-                message:"failed to store data",error:$validator->errors()->first());
-        }
         try{
             $filePath = $request->file('file')->store('public/documents');
             $documents=$this->repository->create([
@@ -91,21 +82,12 @@ class DocumentsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Documents $documents)
+    public function update(DocumentsRequest $request, Documents $documents)
     {
         // Validate the request data
 
-        $validator = Validator::make($request->all(), [
-            'employee_id' => 'sometimes|required|exists:employees,id',
-            'document_type' => 'sometimes|required|string',
-            'file' => 'sometimes|required|file|mimes:pdf,jpg,png|max:2048',
-            'uploaded_at' => 'sometimes|required|date',
-        ]);
-    
-        // Check for validation failures
-        if ($validator->fails()) {
-            return response()->json(['message' => 'Validation failed', 'errors' => $validator->errors()], 422);
-        }
+         
+       
 
         try {
             // Find the document by ID using the repository
@@ -116,7 +98,7 @@ class DocumentsController extends Controller
             }
 
             // Prepare the data for updating
-            $updateData = $validator->validated();
+            $updateData = $request->validated();
 
             // If a file is provided, store it and add the path to update data
             if ($request->hasFile('file')) {

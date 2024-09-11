@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use App\ResponseTrait;
 use App\Models\Departments;
 use App\ControllerRepo\EmployeeRepository;
+use App\Http\Requests\EmployeeRequest;
 class EmployeeController extends Controller
 {
     use ResponseTrait;
@@ -32,52 +33,29 @@ class EmployeeController extends Controller
     }
     
   
-    public function store(Request $request)
+    public function store(EmployeeRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id',
-            'departments' => 'required|exists:departments,id',
-            'position' => 'required|string|max:255',
-            'date_of_birth' => 'nullable|date',
-            'gender' => 'nullable|in:male,female,other',
-            'hire_date' => 'required|date',
-            'salary' => 'required|numeric',
-            'status' => 'required|in:active,terminated',
-        ]);
+       
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $employee = $this->repository->create($validator->validated());
+        $employee = $this->repository->create($request->validated());
         return $this->success(
             $employee,
             'success to store data',
         );
     }
 
-    public function update(Request $request, Employees $employee){
+    public function update(EmployeeRequest $request, Employees $employee){
         $updated=Employees::findorfail($employee->id);
         
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id',
-            'departments' => 'required|exists:departments,id',
-            'position' => 'required|string|max:255',
-            'date_of_birth' => 'nullable|date',
-            'gender' => 'nullable|in:male,female,other',
-            'hire_date' => 'required|date',
-            'salary' => 'required|numeric',
-            'status' => 'required|in:active,terminated',
-            'version'=>'required|integer',
-        ]);
+       
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+        if ($request->fails()) {
+            return response()->json(['errors' => $request->errors()], 422);
         }
  
         try{
 
-            $updated= $this->repository->update($employee->id, $validator->validated());
+            $updated= $this->repository->update($employee->id, $request->validated());
             return $this->success(
                 $updated,
                 'success to update data',

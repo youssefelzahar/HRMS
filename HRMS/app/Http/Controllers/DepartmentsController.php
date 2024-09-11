@@ -11,6 +11,7 @@ use Illuminate\Support\Collection;
 use App\ResponseTrait;
 use App\interface\BaseInterface;
 use App\ControllerRepo\DepartementRepository;
+use App\Http\Requests\DepartmentsRequest;
 class DepartmentsController extends Controller
 {
     use ResponseTrait;
@@ -48,23 +49,16 @@ class DepartmentsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(DepartmentsRequest $request)
     {
         //
-        $validator=Validator::make($request->all(),[
-              'name'=>'required',
-              'description'=>'required'
-        ]);
 
-        if ($validator->fails()) {
-            return $this->failure(
-                message:"error to validate",error:$validator->errors()->first()
-            );
-            }
+
+        
        
         try{
           
-            $departments=  $this->repository->create($validator->validated());
+            $departments=  $this->repository->create($request->validated());
 
             return $this->success(
                 data:$departments,
@@ -97,22 +91,13 @@ class DepartmentsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Departments $departments)
+    public function update(DepartmentsRequest $request, Departments $departments)
     {
         //
         $updatedepartments=Departments::findorfail($departments->id);
-        $validator=Validator::make($request->all(),[
-            'name'=>'required',
-            'description'=>'required'
-      ]);
-
-      if ($validator->fails()) {
-          return $this->failure(
-              message:"error to validate",error:$validator->errors()->first()
-          );
-          }
+       
         try{  
-            $updatedepartments=$this->repository->update($departments->id,$validator->validated());
+            $updatedepartments=$this->repository->update($departments->id,$request->validated());
             return $this->success(
                 data:$updatedepartments,
                 message:"success to update data",

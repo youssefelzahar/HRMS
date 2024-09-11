@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use App\ResponseTrait;
+use App\Http\Requests\AuthRequest;
 class AuthController extends Controller
 {
     use ResponseTrait;
@@ -25,19 +26,16 @@ class AuthController extends Controller
 
         return view('register');
     }
-    public function index(Request $request){
+    public function index(AuthRequest $request){
         $user=$this->reprisotry->getAll();
         return $this->success(
             data:$user,
             message:"success to login",
         );
     }
-    public function login(Request $request)
+    public function login(AuthRequest $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+      
         $cardinatles=$request->only('email', 'password');
         if(!Auth::attempt($cardinatles)){
            return $this->failure(
@@ -57,13 +55,8 @@ class AuthController extends Controller
        }
 
  
-       public function register(Request $request)
+       public function register(AuthRequest $request)
        {
-           $request->validate([
-               'name' => 'required',
-               'email' => 'required|email|unique:users',
-               'password' => 'required|min:6',
-           ]);
     
            $user=$this->reprisotry->create([
                'name' => $request->name,

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Collection;
 use App\ResponseTrait;
 use App\ControllerRepo\LeaveTypeRepo;
+use App\Http\Requests\Leave_types_Request;
 class LeaveTypesController extends Controller
 {
     use ResponseTrait;
@@ -37,20 +38,13 @@ class LeaveTypesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Leave_types_Request $request)
     {
         //
-        $validator = Validator::make($request->all(), [
-            "name"=>"required",
-            "description"=>"required", 
-         ]);
- 
-         if ($validator->fails()) {
-             return $this->failure(message:"failed to validate data",error:$validator->errors()->first());
-         }
+
  
          try {
-               $types=LeaveTypes::create($validator->validated());
+               $types=LeaveTypes::create($request->validated());
                return $this->success($types, 'success to store data');
  
          }catch(\Exception $e) {
@@ -79,7 +73,7 @@ class LeaveTypesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, LeaveTypes $leaveTypes)
+    public function update(Leave_types_Request $request, LeaveTypes $leaveTypes)
     {
         //
          //
@@ -92,22 +86,10 @@ class LeaveTypesController extends Controller
                 $message = "Record not found",
                 error: $e->getMessage(),
             );
-        }
-    
-        $validator = Validator::make($request->all(), [
-            "name"=>"required",
-            "description"=>"required", 
-        ]);
-    
-        if ($validator->fails()) {
-            return $this->failure(
-                $message = "Failed to validate data",
-                error:$validator->errors(),
-            );
-        }
+        }  
     
         try {
-            $update=$this->repository->update($leaveTypes->id,$validator->validated());
+            $update=$this->repository->update($leaveTypes->id,$request->validated());
     
            return $this->success(
                $message = "success to update data",

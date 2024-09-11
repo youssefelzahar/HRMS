@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Collection;
 use App\ResponseTrait;    
 use App\ControllerRepo\LeaveRequestReprository;
+use App\Http\Requests\Leave_Requests_Request;
 class LeaveRequestsController extends Controller
 {
     use ResponseTrait;
@@ -42,26 +43,13 @@ class LeaveRequestsController extends Controller
      * Store a newly created resource in storage.
      */
     
-     public function store(Request $request)
+     public function store(Leave_Requests_Request $request)
 {
-    // Validate the request data
-    $validator = Validator::make($request->all(), [
-        'employee_id' => 'required|exists:employees,id', // Check if employee_id exists in employees table
-        'start_date' => 'required|date', // Ensure the date format is correct
-        'end_date' => 'required|date|after_or_equal:start_date', // Ensure end_date is after or equal to start_date
-        'reason' => 'required|string',
-        'status' => 'required|in:pending,approved,rejected',
-        'leave_typess_id'=>'required' // Define valid status values
-    ]);
-
-    // Check if validation failed
-    if ($validator->fails()) {
-        return $this->failure(message:"failed to validate",error:$validator->errors()->first());
-    }
+    
 
     try {
         // Create a new leave request record
-        $leaveRequest = $this->reporsitory->create($validator->validated());
+        $leaveRequest = $this->reporsitory->create($request->validated());
 
         return $this->success(data:$leaveRequest, message:"success to store data");
     } catch (\Exception $e) {
@@ -92,23 +80,13 @@ class LeaveRequestsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, LeaveRequests $leaveRequests)
+    public function update(Leave_Requests_Request $request, LeaveRequests $leaveRequests)
     {
         //
 
-        $validate=Validator::make($request->all(),[
-            'employee_id' => 'required|exists:employees,id',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'reason' => 'required|string',
-            'status' => 'required|in:pending,approved,rejected',
-            'leave_typess_id'=>'required'
-        ]);
-        if($validate->fails()){       
-            return $this->failure(message:'failed to validate',error:$validate->errors());  
-        }
+     
         try{
-            $this->reporsitory->update($leaveRequests->id,$validate->validated());
+            $this->reporsitory->update($leaveRequests->id,$request->validated());
             return $this->success(data:$leaveRequests, message:'success to update data');
         }catch(\Exception $e){
             return $this->failure(message:"failed to update",error:$e->getMessage());
