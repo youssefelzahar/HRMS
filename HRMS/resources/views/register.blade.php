@@ -33,6 +33,9 @@
 
             <button type="submit" class="btn btn-primary">Register</button>
         </form>
+        <a href="{{ url('auth/google') }}" class="btn btn-google">Login with Google</a>
+<a href="{{ url('auth/facebook') }}" class="btn btn-facebook">Login with Facebook</a>
+
     </div>
 </body>
 </html>
