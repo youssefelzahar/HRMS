@@ -9,6 +9,8 @@ class Employees extends Model
 {
     use HasFactory;
 
+    protected $connection = 'tenant';
+
     protected $fillable = [
         'user_id',
         'departments',
@@ -18,6 +20,7 @@ class Employees extends Model
         'hire_date',
         'salary',
         'status',
+        'version'
     ];
 
     public function user()
@@ -27,8 +30,9 @@ class Employees extends Model
 
     public function department()
     {
-        return $this->hasMany(Department::class);
+        return $this->belongsTo(Departments::class, 'departments');
     }
+
     public function documents(){
         return $this->hasMany(Documents::class);
     }
